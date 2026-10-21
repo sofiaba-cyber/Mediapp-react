@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import api from '../services/api'
 
 function EditarMedicamento() {
 
-  const navegar = useNavigate()
+  const [parametros] = useSearchParams()
 
-  const [id, setId] = useState('')
+  const [id, setId] = useState(
+    parametros.get('id') || ''
+  )
+
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [precio, setPrecio] = useState('')
@@ -102,7 +105,6 @@ function EditarMedicamento() {
                   onChange={(evento) =>
                     setId(evento.target.value)
                   }
-                  placeholder="Ejemplo: 9"
                   required
                 />
 

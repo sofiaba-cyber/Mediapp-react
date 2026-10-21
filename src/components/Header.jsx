@@ -89,6 +89,12 @@ function Header() {
             >
               👤 Perfil
             </Link>
+            <Link
+  to="/admin/medicamentos"
+  className="btn btn-warning btn-sm me-1 mb-1"
+>
+  ⚙️ Administración
+</Link>
 
             <button
               className="btn btn-danger btn-sm mb-1"
