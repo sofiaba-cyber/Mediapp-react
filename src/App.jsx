@@ -35,7 +35,8 @@ function App() {
         {/* Pantallas principales */}
         <Route
           path="/"
-          element={<Inicio />}
+          element={<Login />}
+
         />
 
         <Route
