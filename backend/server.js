@@ -24,8 +24,8 @@ const db = mysql.createConnection({
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'mydb',
   ssl: process.env.DB_SSL === 'true'
-    ? { rejectUnauthorized: true }
-    : undefined
+  ? { rejectUnauthorized: false }
+  : undefined
 })
 
 
