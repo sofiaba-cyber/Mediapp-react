@@ -38,7 +38,7 @@ function Login() {
       )
 
       setTimeout(() => {
-        navegar('/')
+        navegar('/inicio')
       }, 500)
 
     } catch (error) {

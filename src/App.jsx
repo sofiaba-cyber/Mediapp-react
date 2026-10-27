@@ -33,12 +33,17 @@ function App() {
         />
 
         {/* Pantallas principales */}
-        <Route
-          path="/"
-          element={<Login />}
+     <Route
+  path="/inicio"
+  element={<Inicio />}
+/>
 
-        />
+<Route
+  path="/"
+  element={<Login />}
+/>
 
+      
         <Route
           path="/medicamentos"
           element={<Medicamentos />}
