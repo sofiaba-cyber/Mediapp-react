@@ -1391,18 +1391,17 @@ app.get('/api/notificaciones/:idUsuario', (req, res) => {
   const idUsuario = req.params.idUsuario
 
   const sql = `
-    SELECT
-      notificación.idNOTIFICACIÓN,
-      notificación.mensaje,
-      notificación.Fecha,
-      notificación.leida
-    FROM notificación
-    INNER JOIN cliente
-      ON CLIENTE.idCLIENTE =
-         notificación.CLIENTE_idCLIENTE
-    WHERE CLIENTE.USUARIOS_idUSUARIOS = ?
-    ORDER BY notificación.idNOTIFICACIÓN DESC
-  `
+  SELECT
+    n.idNOTIFICACIÓN,
+    n.mensaje,
+    n.Fecha,
+    n.leida
+  FROM notificación n
+  INNER JOIN cliente c
+    ON c.idCLIENTE = n.CLIENTE_idCLIENTE
+  WHERE c.USUARIOS_idUSUARIOS = ?
+  ORDER BY n.idNOTIFICACIÓN DESC
+`
 
   db.query(
     sql,
