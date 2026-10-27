@@ -372,21 +372,21 @@ app.get('/api/clientes/:idUsuario', (req, res) => {
     req.params.idUsuario
 
   const sql = `
-    SELECT
-      USUARIOS.idUSUARIOS,
-      USUARIOS.nombre,
-      USUARIOS.CORREO,
-      USUARIOS.ROL,
-      CLIENTE.idCLIENTE,
-      CLIENTE.Correo,
-      CLIENTE.Dirección,
-      CLIENTE.Telefono
-    FROM usuarios
-    INNER JOIN cliente
-      ON CLIENTE.USUARIOS_idUSUARIOS =
-         USUARIOS.idUSUARIOS
-    WHERE USUARIOS.idUSUARIOS = ?
-  `
+  SELECT
+    u.idUSUARIOS,
+    u.nombre,
+    u.CORREO,
+    u.ROL,
+    c.idCLIENTE,
+    c.Correo,
+    c.Dirección,
+    c.Telefono
+  FROM usuarios u
+  INNER JOIN cliente c
+    ON c.USUARIOS_idUSUARIOS = u.idUSUARIOS
+  WHERE u.idUSUARIOS = ?
+`
+  
 
   db.query(
     sql,
