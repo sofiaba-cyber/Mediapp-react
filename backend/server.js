@@ -1013,7 +1013,7 @@ app.put('/api/pedidos/:idPedido/estado', (req, res) => {
   const sql = `
     UPDATE PEDIDO
     SET Estado = ?
-    WHERE idPEDIDO = ?
+    WHERE idPEDIDO = ?  
   `
 
   db.query(
@@ -1427,11 +1427,10 @@ app.get('/api/notificaciones/:idUsuario', (req, res) => {
   )
 
 })
-const PORT = 3000
+const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
-
   console.log(
-    `🚀 Servidor ejecutándose en http://localhost:${PORT}`
+    `🚀 Servidor ejecutándose en el puerto ${PORT}`
   )
 })
