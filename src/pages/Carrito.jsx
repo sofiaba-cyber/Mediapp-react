@@ -20,20 +20,54 @@ function Carrito() {
 
   }, [])
 
-  const eliminarProducto = (indice) => {
+const eliminarProducto = (indice) => {
 
-    const nuevoCarrito =
-      carrito.filter(
-        (_, index) => index !== indice
-      )
-
-    setCarrito(nuevoCarrito)
-
-    localStorage.setItem(
-      'carritoMediApp',
-      JSON.stringify(nuevoCarrito)
+  const nuevoCarrito =
+    carrito.filter(
+      (_, index) => index !== indice
     )
+
+  setCarrito(nuevoCarrito)
+
+  localStorage.setItem(
+    'carritoMediApp',
+    JSON.stringify(nuevoCarrito)
+  )
+}
+
+
+const cambiarCantidad = (indice, cambio) => {
+
+  console.log(
+    '🔢 Cambio de cantidad:',
+    indice,
+    cambio,
+    carrito[indice]
+  )
+
+  const nuevoCarrito = [...carrito]
+
+  const nuevaCantidad =
+    Number(nuevoCarrito[indice].cantidad) + cambio
+
+  console.log(
+    '📦 Nueva cantidad:',
+    nuevaCantidad
+  )
+
+  if (nuevaCantidad < 1) {
+    return
   }
+
+  nuevoCarrito[indice].cantidad = nuevaCantidad
+
+  setCarrito(nuevoCarrito)
+
+  localStorage.setItem(
+    'carritoMediApp',
+    JSON.stringify(nuevoCarrito)
+  )
+}
 
   const calcularTotal = () => {
 
@@ -260,12 +294,37 @@ function Carrito() {
                           ).toLocaleString('es-CO')}
                         </p>
 
-                        <p>
-                          <strong>
-                            Cantidad:
-                          </strong>{' '}
-                          {medicamento.cantidad}
-                        </p>
+                        <div className="d-flex align-items-center gap-2 mb-3">
+
+  <strong>
+    Cantidad:
+  </strong>
+
+  <button
+    type="button"
+    className="btn btn-outline-primary"
+    onClick={() =>
+      cambiarCantidad(indice, -1)
+    }
+  >
+    −
+  </button>
+
+  <span className="fw-bold">
+    {medicamento.cantidad}
+  </span>
+
+  <button
+    type="button"
+    className="btn btn-outline-primary"
+    onClick={() =>
+      cambiarCantidad(indice, 1)
+    }
+  >
+    +
+  </button>
+
+</div>
 
                         <button
                           className="btn btn-danger"

@@ -63,6 +63,78 @@ function Pedidos() {
 
   }, [])
 
+  const eliminarPedido = async (idPedido) => {
+
+    
+
+  const confirmar = window.confirm(
+    '¿Estás seguro de que deseas eliminar este pedido?'
+  )
+
+  if (!confirmar) return
+
+  try {
+
+    await api.delete(`/pedidos/${idPedido}`)
+
+    // Actualizar la lista sin recargar la página
+    setPedidos(
+      pedidos.filter(
+        pedido => pedido.idPEDIDO !== idPedido
+      )
+    )
+
+    alert('✅ Pedido eliminado correctamente.')
+
+  } catch (error) {
+
+    console.error(
+      '❌ Error al eliminar pedido:',
+      error
+    )
+
+    alert(
+      error.response?.data?.mensaje ||
+      '❌ No se pudo eliminar el pedido.'
+    )
+
+  }
+}
+const cambiarEstado = async (idPedido, nuevoEstado) => {
+
+  try {
+
+    await api.put(
+      `/pedidos/${idPedido}/estado`,
+      {
+        estado: nuevoEstado
+      }
+    )
+
+    setPedidos(
+      pedidos.map(pedido =>
+        pedido.idPEDIDO === idPedido
+          ? { ...pedido, Estado: nuevoEstado }
+          : pedido
+      )
+    )
+
+    alert('✅ Estado actualizado correctamente.')
+
+  } catch (error) {
+
+    console.error(
+      '❌ Error al cambiar estado:',
+      error
+    )
+
+    alert(
+      error.response?.data?.mensaje ||
+      '❌ No se pudo cambiar el estado.'
+    )
+
+  }
+}
   return (
 
     <div className="min-vh-100 d-flex flex-column">
@@ -138,10 +210,39 @@ function Pedidos() {
 
                   </p>
 
+                  <select
+  className="form-select mt-2"
+  value={pedido.Estado}
+  onChange={(e) =>
+    cambiarEstado(
+      pedido.idPEDIDO,
+      e.target.value
+    )
+  }
+>
+  <option value="En proceso">
+    En proceso
+  </option>
+
+  <option value="En camino">
+    En camino
+  </option>
+
+  <option value="Entregado">
+    Entregado
+  </option>
+</select>
+
                   <p>
                     <strong>Dirección:</strong>{' '}
                     {pedido.direccion}
                   </p>
+<button
+  className="btn btn-danger mt-3"
+  onClick={() => eliminarPedido(pedido.idPEDIDO)}
+>
+  🗑️ Eliminar pedido
+</button>
 
                 </div>
 

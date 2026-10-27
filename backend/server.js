@@ -557,6 +557,196 @@ app.put('/api/clientes/:idUsuario', (req, res) => {
     }
   )
 })
+
+// ====================================
+// ELIMINAR CLIENTE
+// ====================================
+
+app.delete('/api/clientes/:idUsuario', (req, res) => {
+
+  const idUsuario = req.params.idUsuario
+
+  // Buscar el cliente asociado al usuario
+  const sqlBuscarCliente = `
+    SELECT idCLIENTE
+    FROM CLIENTE
+    WHERE USUARIOS_idUSUARIOS = ?
+  `
+
+  db.query(
+    sqlBuscarCliente,
+    [idUsuario],
+    (error, resultados) => {
+
+      if (error) {
+        console.error('❌ Error al buscar cliente:', error)
+
+        return res.status(500).json({
+          mensaje: 'No se pudo buscar el cliente.'
+        })
+      }
+
+      if (resultados.length === 0) {
+        return res.status(404).json({
+          mensaje: 'No se encontró el cliente.'
+        })
+      }
+
+      const idCliente = resultados[0].idCLIENTE
+
+      // Buscar los pedidos del cliente
+      const sqlBuscarPedidos = `
+        SELECT idPEDIDO
+        FROM PEDIDO
+        WHERE CLIENTE_idCLIENTE = ?
+      `
+
+      db.query(
+        sqlBuscarPedidos,
+        [idCliente],
+        (errorPedidos, pedidos) => {
+
+          if (errorPedidos) {
+            console.error(
+              '❌ Error al buscar pedidos:',
+              errorPedidos
+            )
+
+            return res.status(500).json({
+              mensaje: 'No se pudieron buscar los pedidos.'
+            })
+          }
+
+          // IDs de los pedidos encontrados
+          const idsPedidos = pedidos.map(
+            pedido => pedido.idPEDIDO
+          )
+
+          // Si existen pedidos, primero eliminar sus detalles
+          const eliminarPedidos = () => {
+
+            if (idsPedidos.length === 0) {
+              return eliminarCliente()
+            }
+
+            const sqlEliminarDetalles = `
+              DELETE FROM DETALLE_PEDIDO
+              WHERE PEDIDO_idPEDIDO IN (?)
+            `
+
+            db.query(
+              sqlEliminarDetalles,
+              [idsPedidos],
+              (errorDetalles) => {
+
+                if (errorDetalles) {
+                  console.error(
+                    '❌ Error al eliminar detalles:',
+                    errorDetalles
+                  )
+
+                  return res.status(500).json({
+                    mensaje:
+                      'No se pudieron eliminar los detalles de los pedidos.'
+                  })
+                }
+
+                // Después de eliminar los detalles,
+                // eliminar los pedidos
+                const sqlEliminarPedidos = `
+                  DELETE FROM PEDIDO
+                  WHERE CLIENTE_idCLIENTE = ?
+                `
+
+                db.query(
+                  sqlEliminarPedidos,
+                  [idCliente],
+                  (errorEliminarPedidos) => {
+
+                    if (errorEliminarPedidos) {
+                      console.error(
+                        '❌ Error al eliminar pedidos:',
+                        errorEliminarPedidos
+                      )
+
+                      return res.status(500).json({
+                        mensaje:
+                          'No se pudieron eliminar los pedidos.'
+                      })
+                    }
+
+                    eliminarCliente()
+                  }
+                )
+              }
+            )
+          }
+
+          // Eliminar cliente y usuario
+          const eliminarCliente = () => {
+
+            const sqlEliminarCliente = `
+              DELETE FROM CLIENTE
+              WHERE idCLIENTE = ?
+            `
+
+            db.query(
+              sqlEliminarCliente,
+              [idCliente],
+              (errorCliente) => {
+
+                if (errorCliente) {
+                  console.error(
+                    '❌ Error al eliminar cliente:',
+                    errorCliente
+                  )
+
+                  return res.status(500).json({
+                    mensaje:
+                      'No se pudo eliminar el cliente.'
+                  })
+                }
+
+                const sqlEliminarUsuario = `
+                  DELETE FROM USUARIOS
+                  WHERE idUSUARIOS = ?
+                `
+
+                db.query(
+                  sqlEliminarUsuario,
+                  [idUsuario],
+                  (errorUsuario) => {
+
+                    if (errorUsuario) {
+                      console.error(
+                        '❌ Error al eliminar usuario:',
+                        errorUsuario
+                      )
+
+                      return res.status(500).json({
+                        mensaje:
+                          'El cliente fue eliminado, pero no se pudo eliminar el usuario.'
+                      })
+                    }
+
+                    res.json({
+                      mensaje:
+                        '✅ Cliente, pedidos y usuario eliminados correctamente.'
+                    })
+                  }
+                )
+              }
+            )
+          }
+
+          // Comenzar eliminación
+          eliminarPedidos()
+        }
+      )
+    }
+  )
+})
+
 // ====================================
 // CREAR PEDIDO
 // ====================================
@@ -578,21 +768,14 @@ app.post('/api/pedidos', (req, res) => {
     !total ||
     !direccion
   ) {
-
     return res.status(400).json({
-      mensaje:
-        'Faltan datos para crear el pedido.'
+      mensaje: 'Faltan datos para crear el pedido.'
     })
-
   }
 
-  // ====================================
-  // BUSCAR CLIENTE
-  // ====================================
-
+  // Buscar cliente
   const sqlCliente = `
-    SELECT
-      idCLIENTE
+    SELECT idCLIENTE
     FROM CLIENTE
     WHERE USUARIOS_idUSUARIOS = ?
   `
@@ -603,37 +786,25 @@ app.post('/api/pedidos', (req, res) => {
     (errorCliente, resultadosCliente) => {
 
       if (errorCliente) {
-
         console.error(
           '❌ Error al buscar cliente:',
           errorCliente
         )
 
         return res.status(500).json({
-          mensaje:
-            'No se pudo buscar el cliente.'
+          mensaje: 'No se pudo buscar el cliente.'
         })
-
       }
 
-      if (
-        resultadosCliente.length === 0
-      ) {
-
+      if (resultadosCliente.length === 0) {
         return res.status(404).json({
-          mensaje:
-            'El usuario no tiene un cliente asociado.'
+          mensaje: 'El usuario no tiene un cliente asociado.'
         })
-
       }
 
-      const idCliente =
-        resultadosCliente[0].idCLIENTE
+      const idCliente = resultadosCliente[0].idCLIENTE
 
-      // ====================================
-      // CREAR PEDIDO
-      // ====================================
-
+      // Crear pedido
       const sqlPedido = `
         INSERT INTO PEDIDO
         (
@@ -667,101 +838,91 @@ app.post('/api/pedidos', (req, res) => {
         (errorPedido, resultadoPedido) => {
 
           if (errorPedido) {
-
             console.error(
               '❌ Error al crear pedido:',
               errorPedido
             )
 
             return res.status(500).json({
-              mensaje:
-                'No se pudo crear el pedido.'
+              mensaje: 'No se pudo crear el pedido.'
             })
-
           }
 
-          const idPedido =
-            resultadoPedido.insertId
+          const idPedido = resultadoPedido.insertId
 
-          // ====================================
-          // CREAR DETALLES
-          // ====================================
-
+          // Crear detalles
           let detallesProcesados = 0
-          let huboError = false
 
-          productos.forEach(
-            (producto) => {
+          productos.forEach((producto) => {
 
-              const sqlDetalle = `
-                INSERT INTO DETALLE_PEDIDO
-                (
-                  cantidad,
-                  precio_unitario,
-                  MEDICAMENTO_idMEDICAMENTO,
-                  PEDIDO_idPEDIDO
-                )
-                VALUES (?, ?, ?, ?)
-              `
-
-              db.query(
-                sqlDetalle,
-                [
-                  producto.cantidad,
-                  producto.precio,
-                  producto.idMedicamento,
-                  idPedido
-                ],
-                (errorDetalle) => {
-
-                  if (errorDetalle) {
-
-                    huboError = true
-
-                    console.error(
-                      '❌ Error al crear detalle:',
-                      errorDetalle
-                    )
-
-                    return
-                  }
-
-                  detallesProcesados++
-
-                  if (
-                    detallesProcesados ===
-                    productos.length &&
-                    !huboError
-                  ) {
-
-                    res.status(201).json({
-
-                      mensaje:
-                        '✅ Pedido creado correctamente.',
-
-                      idPedido:
-                        idPedido,
-
-                      idCliente:
-                        idCliente
-
-                    })
-
-                  }
-
-                }
+            const sqlDetalle = `
+              INSERT INTO DETALLE_PEDIDO
+              (
+                cantidad,
+                precio_unitario,
+                MEDICAMENTO_idMEDICAMENTO,
+                PEDIDO_idPEDIDO
               )
+              VALUES (?, ?, ?, ?)
+            `
 
-            }
-          )
+            db.query(
+              sqlDetalle,
+              [
+                Number(producto.cantidad),
+                Number(producto.precio),
+                Number(producto.idMedicamento),
+                idPedido
+              ],
+              (errorDetalle) => {
 
+                if (errorDetalle) {
+
+                  console.error(
+                    '❌ ERROR AL GUARDAR DETALLE_PEDIDO:',
+                    errorDetalle
+                  )
+
+                  return res.status(500).json({
+                    mensaje:
+                      'El pedido se creó, pero no se pudo guardar el detalle.',
+                    error:
+                      errorDetalle.message
+                  })
+                }
+
+                detallesProcesados++
+
+                if (
+                  detallesProcesados === productos.length
+                ) {
+
+                  console.log(
+                    '✅ Pedido guardado:',
+                    idPedido
+                  )
+
+                  console.log(
+                    '✅ Detalles guardados:',
+                    productos
+                  )
+
+                  res.status(201).json({
+                    mensaje:
+                      '✅ Pedido y detalles creados correctamente.',
+                    idPedido: idPedido,
+                    idCliente: idCliente
+                  })
+                }
+              }
+            )
+          })
         }
       )
-
     }
   )
-
 })
+
   // ====================================
 // OBTENER PEDIDOS DE UN CLIENTE
 // ====================================
@@ -893,6 +1054,80 @@ app.put('/api/pedidos/:idPedido/estado', (req, res) => {
     }
   )
 
+})
+// ====================================
+// ELIMINAR PEDIDO
+// ====================================
+
+app.delete('/api/pedidos/:idPedido', (req, res) => {
+
+  const idPedido = req.params.idPedido
+
+  // Primero eliminar los detalles asociados al pedido
+  const sqlDetalles = `
+    DELETE FROM DETALLE_PEDIDO
+    WHERE PEDIDO_idPEDIDO = ?
+  `
+
+  db.query(
+    sqlDetalles,
+    [idPedido],
+    (errorDetalles) => {
+
+      if (errorDetalles) {
+
+        console.error(
+          '❌ Error al eliminar los detalles del pedido:',
+          errorDetalles
+        )
+
+        return res.status(500).json({
+          mensaje:
+            'No se pudieron eliminar los detalles del pedido.'
+        })
+      }
+
+      // Después eliminar el pedido
+      const sqlPedido = `
+        DELETE FROM PEDIDO
+        WHERE idPEDIDO = ?
+      `
+
+      db.query(
+        sqlPedido,
+        [idPedido],
+        (errorPedido, resultado) => {
+
+          if (errorPedido) {
+
+            console.error(
+              '❌ Error al eliminar el pedido:',
+              errorPedido
+            )
+
+            return res.status(500).json({
+              mensaje:
+                'No se pudo eliminar el pedido.'
+            })
+          }
+
+          if (resultado.affectedRows === 0) {
+
+            return res.status(404).json({
+              mensaje:
+                'No se encontró el pedido.'
+            })
+          }
+
+          res.json({
+            mensaje:
+              '✅ Pedido eliminado correctamente.'
+          })
+
+        }
+      )
+    }
+  )
 })
 // ====================================
 // INICIAR SERVIDOR

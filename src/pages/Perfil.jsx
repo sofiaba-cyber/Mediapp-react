@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import api from '../services/api'
 
 function Perfil() {
+
+  const navegar = useNavigate()
 
   const [perfil, setPerfil] = useState(null)
 
@@ -141,7 +144,73 @@ function Perfil() {
     }
 
   }
+const eliminarCuenta = async () => {
+  const eliminarCuenta = async () => {
 
+  console.log('🔥 BOTÓN ELIMINAR CUENTA PRESIONADO')
+
+  const confirmar = window.confirm(
+    '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'
+  )
+
+  if (!confirmar) return
+
+  // ...
+}
+
+  const confirmar = window.confirm(
+    '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'
+  )
+
+  if (!confirmar) {
+    return
+  }
+
+  try {
+
+    const usuario =
+      JSON.parse(
+        localStorage.getItem('usuarioMediApp')
+      )
+
+    if (!usuario) {
+
+      setMensaje(
+        '❌ No se encontró la sesión del usuario.'
+      )
+
+      return
+    }
+
+    await api.delete(
+      `/clientes/${usuario.id}`
+    )
+
+    localStorage.removeItem('usuarioMediApp')
+    localStorage.removeItem('usuarioMediAppDatos')
+    localStorage.removeItem('idUsuarioMediApp')
+    localStorage.removeItem('perfilMediApp')
+
+    alert(
+      '✅ Tu cuenta fue eliminada correctamente.'
+    )
+
+    navegar('/login')
+
+  } catch (error) {
+
+    console.error(
+      '❌ Error al eliminar cuenta:',
+      error
+    )
+
+    setMensaje(
+      error.response?.data?.mensaje ||
+      '❌ No se pudo eliminar la cuenta.'
+    )
+
+  }
+}
   if (!perfil) {
 
     return (
@@ -231,6 +300,13 @@ function Perfil() {
                   onClick={() => setEditando(true)}
                 >
                   ✏️ Editar perfil
+                </button>
+
+                <button
+                  className="btn btn-danger ms-2"
+                  onClick={eliminarCuenta}
+                >
+                  🗑️ Eliminar mi cuenta
                 </button>
 
               </>
