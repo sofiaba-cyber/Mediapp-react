@@ -31,7 +31,7 @@ const registrarUsuario = (req, res) => {
   }
 
   const sqlUsuario = `
-    INSERT INTO USUARIOS
+    INSERT INTO usuarios
     (nombre, CORREO, CONTRASEÑA, ROL)
     VALUES (?, ?, ?, ?)
   `
@@ -72,7 +72,7 @@ const registrarUsuario = (req, res) => {
       const idUsuario = resultado.insertId
 
       const sqlCliente = `
-        INSERT INTO CLIENTE
+        INSERT INTO cliente
         (
           Correo,
           Dirección,
@@ -154,7 +154,7 @@ const iniciarSesion = (req, res) => {
       CORREO,
       CONTRASEÑA,
       ROL
-    FROM USUARIOS
+    FROM usuarios
     WHERE CORREO = ?
       AND CONTRASEÑA = ?
   `

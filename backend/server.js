@@ -90,7 +90,7 @@ app.post('/api/login', (req, res) => {
       CORREO,
       CONTRASEÑA,
       ROL
-    FROM USUARIOS
+    FROM usuarios
     WHERE CORREO = ?
       AND CONTRASEÑA = ?
   `
@@ -250,7 +250,7 @@ const {
   // Insertar usuario
 
   const sqlUsuario = `
-    INSERT INTO USUARIOS
+    INSERT INTO usuarios
     (
       nombre,
       CORREO,
@@ -306,7 +306,7 @@ const {
       // Crear cliente
 
 const sqlCliente = `
-  INSERT INTO CLIENTE
+  INSERT INTO cliente
   (
     Correo,
     Dirección,
@@ -381,8 +381,8 @@ app.get('/api/clientes/:idUsuario', (req, res) => {
       CLIENTE.Correo,
       CLIENTE.Dirección,
       CLIENTE.Telefono
-    FROM USUARIOS
-    INNER JOIN CLIENTE
+    FROM usuarios
+    INNER JOIN cliente
       ON CLIENTE.USUARIOS_idUSUARIOS =
          USUARIOS.idUSUARIOS
     WHERE USUARIOS.idUSUARIOS = ?
@@ -487,7 +487,7 @@ app.put('/api/clientes/:idUsuario', (req, res) => {
   }
 
   const sqlUsuario = `
-    UPDATE USUARIOS
+    UPDATE usuarios
     SET
       nombre = ?,
       CORREO = ?
@@ -517,7 +517,7 @@ app.put('/api/clientes/:idUsuario', (req, res) => {
       }
 
       const sqlCliente = `
-        UPDATE CLIENTE
+        UPDATE cliente
         SET
           Correo = ?,
           Dirección = ?,
@@ -570,7 +570,7 @@ app.delete('/api/clientes/:idUsuario', (req, res) => {
   // Buscar el cliente asociado al usuario
   const sqlBuscarCliente = `
     SELECT idCLIENTE
-    FROM CLIENTE
+    FROM cliente
     WHERE USUARIOS_idUSUARIOS = ?
   `
 
@@ -598,7 +598,7 @@ app.delete('/api/clientes/:idUsuario', (req, res) => {
       // Buscar los pedidos del cliente
       const sqlBuscarPedidos = `
         SELECT idPEDIDO
-        FROM PEDIDO
+        FROM pedido
         WHERE CLIENTE_idCLIENTE = ?
       `
 
@@ -631,7 +631,7 @@ app.delete('/api/clientes/:idUsuario', (req, res) => {
             }
 
             const sqlEliminarDetalles = `
-              DELETE FROM DETALLE_PEDIDO
+              DELETE FROM detalle_pedido
               WHERE PEDIDO_idPEDIDO IN (?)
             `
 
@@ -655,7 +655,7 @@ app.delete('/api/clientes/:idUsuario', (req, res) => {
                 // Después de eliminar los detalles,
                 // eliminar los pedidos
                 const sqlEliminarPedidos = `
-                  DELETE FROM PEDIDO
+                  DELETE FROM pedido
                   WHERE CLIENTE_idCLIENTE = ?
                 `
 
@@ -687,7 +687,7 @@ app.delete('/api/clientes/:idUsuario', (req, res) => {
           const eliminarCliente = () => {
 
             const sqlEliminarCliente = `
-              DELETE FROM CLIENTE
+              DELETE FROM cliente
               WHERE idCLIENTE = ?
             `
 
@@ -709,7 +709,7 @@ app.delete('/api/clientes/:idUsuario', (req, res) => {
                 }
 
                 const sqlEliminarUsuario = `
-                  DELETE FROM USUARIOS
+                  DELETE FROM usuarios
                   WHERE idUSUARIOS = ?
                 `
 
@@ -777,7 +777,7 @@ app.post('/api/pedidos', (req, res) => {
   // Buscar cliente
   const sqlCliente = `
     SELECT idCLIENTE
-    FROM CLIENTE
+    FROM cliente
     WHERE USUARIOS_idUSUARIOS = ?
   `
 
@@ -807,7 +807,7 @@ app.post('/api/pedidos', (req, res) => {
 
       // Crear pedido
       const sqlPedido = `
-        INSERT INTO PEDIDO
+        INSERT INTO pedido
         (
           Fecha,
           Estado,
@@ -857,7 +857,7 @@ app.post('/api/pedidos', (req, res) => {
           productos.forEach((producto) => {
 
             const sqlDetalle = `
-              INSERT INTO DETALLE_PEDIDO
+              INSERT INTO detalle_pedido
               (
                 cantidad,
                 precio_unitario,
@@ -945,12 +945,12 @@ app.get('/api/pedidos/:idUsuario', (req, res) => {
       dp.precio_unitario,
       m.idMEDICAMENTO,
       m.Nombre AS medicamento
-    FROM PEDIDO p
-    INNER JOIN CLIENTE c
+    FROM pedido p
+    INNER JOIN cliente c
       ON p.CLIENTE_idCLIENTE = c.idCLIENTE
-    INNER JOIN DETALLE_PEDIDO dp
+    INNER JOIN detalle_pedido dp
       ON dp.PEDIDO_idPEDIDO = p.idPEDIDO
-    INNER JOIN MEDICAMENTO m
+    INNER JOIN medicamento m
       ON dp.MEDICAMENTO_idMEDICAMENTO = m.idMEDICAMENTO
     WHERE c.USUARIOS_idUSUARIOS = ?
     ORDER BY p.idPEDIDO DESC
@@ -1012,7 +1012,7 @@ app.put('/api/pedidos/:idPedido/estado', (req, res) => {
   }
 
   const sql = `
-    UPDATE PEDIDO
+    UPDATE pedido
     SET Estado = ?
     WHERE idPEDIDO = ?  
   `
@@ -1066,7 +1066,7 @@ app.delete('/api/pedidos/:idPedido', (req, res) => {
 
   // Primero eliminar los detalles asociados al pedido
   const sqlDetalles = `
-    DELETE FROM DETALLE_PEDIDO
+    DELETE FROM detalle_pedido
     WHERE PEDIDO_idPEDIDO = ?
   `
 
@@ -1090,7 +1090,7 @@ app.delete('/api/pedidos/:idPedido', (req, res) => {
 
       // Después eliminar el pedido
       const sqlPedido = `
-        DELETE FROM PEDIDO
+        DELETE FROM pedido
         WHERE idPEDIDO = ?
       `
 
@@ -1397,7 +1397,7 @@ app.get('/api/notificaciones/:idUsuario', (req, res) => {
       notificación.Fecha,
       notificación.leida
     FROM notificación
-    INNER JOIN CLIENTE
+    INNER JOIN cliente
       ON CLIENTE.idCLIENTE =
          notificación.CLIENTE_idCLIENTE
     WHERE CLIENTE.USUARIOS_idUSUARIOS = ?
