@@ -1141,7 +1141,7 @@ app.get('/api/medicamentos', (req, res) => {
     precio,
     stock,
     CATEGORIA_idCATEGORIA
-  FROM MEDICAMENTO
+  FROM medicamento
   ORDER BY Nombre ASC
 `
 
@@ -1194,7 +1194,7 @@ app.post('/api/medicamentos', (req, res) => {
   }
 
   const sql = `
-    INSERT INTO MEDICAMENTO
+    INSERT INTO medicamento
     (
       Nombre,
       descripcion,
@@ -1276,7 +1276,7 @@ app.put('/api/medicamentos/:id', (req, res) => {
   }
 
   const sql = `
-    UPDATE MEDICAMENTO
+    UPDATE medicamento
     SET
       Nombre = ?,
       descripcion = ?,
@@ -1339,7 +1339,7 @@ app.delete('/api/medicamentos/:id', (req, res) => {
   const idMedicamento = req.params.id
 
   const sql = `
-    DELETE FROM MEDICAMENTO
+    DELETE FROM medicamento
     WHERE idMEDICAMENTO = ?
   `
 
